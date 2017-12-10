@@ -6,6 +6,7 @@ import static java.lang.Math.sin;
 import static io.jenetics.engine.EvolutionResult.toBestPhenotype;
 import static io.jenetics.engine.Limits.bySteadyFitness;
 
+import java.io.Console;
 import java.util.stream.IntStream;
 
 import io.jenetics.EnumGene;
@@ -21,6 +22,7 @@ import io.jenetics.engine.EvolutionStatistics;
 
 public class TravelingSalesman {
     private static final int STOPS = 20;
+    public static int Count =0;
     private static final double[][] ADJACENCE = matrix(STOPS);
 
     private static double[][] matrix(int stops) {
@@ -54,7 +56,14 @@ public class TravelingSalesman {
                 .sum();
     }
 
-    public static void main(String[] args) {
+    public static void GetBestPath(String NameAgent) {
+
+        if (Count < 3){
+            Count ++;
+            System.out.println("Принято сообщение от агента" + NameAgent);
+            return;
+        }
+
         final Engine<EnumGene<Integer>, Double> engine = Engine
                 .builder(
                         TravelingSalesman::dist,
@@ -85,7 +94,7 @@ public class TravelingSalesman {
                         // Collect (reduce) the evolution stream to
                         // its best phenotype.
                         .collect(toBestPhenotype());
-
+        System.out.println("Получено лучшее решение от агента" + NameAgent);
         System.out.println(statistics);
         System.out.println(best);
     }

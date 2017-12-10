@@ -2,6 +2,7 @@ package projects.isleAgents;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import flexjson.JSONSerializer;
 import io.jenetics.EnumGene;
 import io.jenetics.Phenotype;
 import io.jenetics.engine.Engine;
@@ -24,7 +25,7 @@ public class AgentDistributor extends Agent {
     private Gson gson = new Gson();
 
     public void setup() {
-        System.out.println("Hello World, my name is : " +
+        System.out.println("Запущен агент распределитель : " +
                 getAID().getName());
         //поведение агента, исполняемое в цикле
         addBehaviour(new CyclicBehaviour(this) {
@@ -34,12 +35,16 @@ public class AgentDistributor extends Agent {
                 ACLMessage msg = receive();
                 if (msg != null)
                 {
-                    Type collectionType = new TypeToken<Engine<EnumGene<Integer>, Double>>(){}.getType();
-                    Engine<EnumGene<Integer>, Double> engine  = gson.fromJson(msg.getContent(), collectionType);
+                    try{
+                        Type collectionType = new TypeToken<Engine<EnumGene<Integer>, Double>>(){}.getType();
+                        Engine<EnumGene<Integer>, Double> engine  = gson.fromJson(msg.getContent(), collectionType);
+                    }
+                    catch (Exception ex){
 
-                    Utils.GetBest(engine, 11, 500);
-
-
+                    }
+                    if (msg.getContent() != null)
+                        TravelingSalesman.GetBestPath(msg.getSender().getName());
+                   // Utils.GetBest(engine, 11, 500);
                 }
             }
         });
@@ -62,11 +67,23 @@ public class AgentDistributor extends Agent {
             Engine<EnumGene<Integer>, Double> enumGeneDoubleEngine = Utils.GetEngine(11,4);
             Phenotype<EnumGene<Integer>, Double> enumGeneDoublePhenotype = Utils.GetBest(enumGeneDoubleEngine, 15, 1);
 
-            Type collectionMessageType = new TypeToken<Phenotype<EnumGene<Integer>, Double>>(){}.getType();
-            String result = gson.toJson(enumGeneDoublePhenotype, collectionMessageType);
-            msg.setContent(result); // содержимое сообщения
+//            Type collectionMessageType = new TypeToken<Phenotype<EnumGene<Integer>, Double>>(){}.getType();
+//            String result = gson.toJson(enumGeneDoublePhenotype, collectionMessageType);
 
-            send(msg);// передача сообщения
+            try {
+                JSONSerializer ser = new JSONSerializer();
+                String json = ser.deepSerialize(enumGeneDoublePhenotype);
+                msg.setContent(json); // содержимое сообщения
+
+                send(null);
+            }
+            catch (Exception ex){
+
+            }
+
+
+
+            // передача сообщения
         }
     }
 }
